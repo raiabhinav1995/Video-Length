@@ -5,8 +5,8 @@ const path=require('path');
 // Made by Rajneesh on remote session using AnyDesk.
 
 function allMp4FilesInADirectory(pathOfDir)
-{ let mp4Files=[];
-    let emptiness=[];
+{
+    let mp4Files=[];
     let files=fs.readdirSync(pathOfDir, "utf8");
     files=files.sort((a,b)=>
     {
@@ -14,39 +14,42 @@ function allMp4FilesInADirectory(pathOfDir)
         let num2 = +b.match(/\d+/g); 
         return num1-num2;
     });
-    // console.log(files);
-    //matches = str.match(/\d+/g); 
-    for(let file of files){
-        // console.log(file)
-        mp4Files.push(fs.readdirSync(`${pathOfDir}/${file}`).filter(f1 =>f1.endsWith('.mp4')).map(l1=>`${pathOfDir}/${file}/${l1}`));
+        for(let file of files){
+        let fileRet=fs.readdirSync(`${pathOfDir}/${file}`).filter(f1 =>f1.endsWith('.mp4')).map(l1=>`${pathOfDir}/${file}/${l1}`);
+        if(fileRet===[])continue;
+        mp4Files.push(fileRet);
     }
-    for(let m1 of mp4Files)
-    {
-        for(let m2 of m1)
-        {
-            // console.log(m2);
-            emptiness.push(m2);
-        }
-    }
-    // console.log(emptiness);
-return totalLength(emptiness);
+    let mp4 = [].concat(...mp4Files);
+    return mp4;
 }
 
-function totalLength(emptiness)
+
+function returnFilesByHours(mp4Videos)
 {
-    let length=0;
-    // console.log(emptiness);
-    for(let video of emptiness)
+    let videos=[];
+    let minutes=0;
+    let hours=0;
+    for(let i=0;i<mp4Videos.length;i++)
     {
-        //console.log(index, video);
-        getVideoDurationInSeconds(video).then(len=>{length+=(len/60);console.log(video, len);
-        }).catch(err=>console.log(err));
-
-        
+        getVideoDurationInSeconds(mp4Videos[i]).then(data=>{
+            data/=60;
+            if(minutes<60)
+            {
+                if(i===mp4.length-1)if(i===mp4.length-1)console.log(`Total Time is ${videos.length} Hours and ${minutes.toFixed(2)} minutes`);
+                minutes+=data;
+                hours++;
+            }
+            else
+            {
+                videos.push(hours);
+                console.log(`${videos.length} Hour reached at ${hours} video`);
+                minutes=minutes-60;
+                hours++;
+                minutes+=data;
+                if(i===mp4.length-1)console.log(`Total Time is ${videos.length} Hours and ${minutes} minutes`);
+            }
+        })
     }
-
-   // console.log(length);
-    return length;
-// getVideoDurationInSeconds('/home/abhinav/Downloads/React-Udemy/1. Getting Started/2. What is React.mp4').then(len=>console.log(len));
 }
-console.log(allMp4FilesInADirectory('/home/abhinav/Downloads/React-Udemy'));
+mp4=allMp4FilesInADirectory('/home/abhinav/Downloads/React-Udemy');
+returnFilesByHours(mp4);
